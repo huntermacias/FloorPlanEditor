@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import DraggableBox from './DraggableBox';
 import { generateGridLines } from '@/lib/generateGridLines';
 import { v4 as uuidv4 } from 'uuid';
 import { useGridContext } from "@/Providers/GridProvider";
+import throttle from 'lodash/throttle';
+
 
 
 const FloorPlanEditor = () => {
@@ -42,10 +44,10 @@ const FloorPlanEditor = () => {
 
     const handleAddBox = (clientX: number, clientY: number) => {
         const gridRect = floorPlanRef.current?.getBoundingClientRect();
-        if (!gridRect) return; 
+        if (!gridRect) return;
 
-        const x = clientX - gridRect.left; 
-        const y = clientY - gridRect.top; 
+        const x = clientX - gridRect.left;
+        const y = clientY - gridRect.top;
 
         if (x < 0 || y < 0 || x >= gridRect.width || y >= gridRect.height) return;
 
@@ -79,6 +81,38 @@ const FloorPlanEditor = () => {
     };
 
 
+    const handleAddBoxThrottled = useCallback(throttle((clientX, clientY) => {
+        const gridRect = floorPlanRef.current?.getBoundingClientRect();
+        
+        const x = clientX - gridRect!.left;
+        const y = clientY - gridRect!.top;
+        const gridX = Math.floor(x / gridSize) * gridSize;
+        const gridY = Math.floor(y / gridSize) * gridSize;
+        if (!gridRect || x < 0 || y < 0 || x >= gridRect.width || y >= gridRect.height) return;
+
+        if (boxes.some(box => box.config.position.x === gridX && box.config.position.y === gridY)) return;
+
+
+        setBoxes(prev => [...prev, {
+            
+            id: `box-${uuidv4()}`,
+            
+            config: {
+                id: `box-${uuidv4()}`,
+                itemNum: `item-${Date.now()}`,
+                product: `product-${Date.now()}`,
+                department: `department-${Date.now()}`,
+                position: { x: gridX, y: gridY },
+                cellPosition: { row: Math.floor(gridY / gridSize), col: Math.floor(gridX / gridSize) },
+                color: selectedColor || boxConfig.config.color,
+                size: boxConfig.config.size,
+                dragConstraints: boxConfig.config.dragConstraints,
+                dragElastic: boxConfig.config.dragElastic,
+
+            }
+        }]);
+    }, 500), [boxes, gridSize, gridWidth, gridHeight]);
+
     // Handler to start drawing
     const handleMouseDown = (event: any) => {
         if (!isDrawing) return;
@@ -86,6 +120,7 @@ const FloorPlanEditor = () => {
         const offsetX = event.clientX;
         const offsetY = event.clientY;
         handleAddBox(offsetX, offsetY);
+        // handleAddBoxThrottled(offsetX, offsetY);
     };
 
 
@@ -120,6 +155,7 @@ const FloorPlanEditor = () => {
         const mouseMoveHandler = (event: MouseEvent) => {
             // Directly call handleAddBox without intermediate variables
             handleAddBox(event.clientX, event.clientY);
+            // handleAddBoxThrottled(event.clientX, event.clientY);
         };
 
         // Simplify event listener setup and teardown
@@ -144,13 +180,13 @@ const FloorPlanEditor = () => {
             if (!needsAdjustment) return;
 
             const updatedBoxes = boxes.map(box => {
-                const newSize = gridSize - 4; 
+                const newSize = gridSize - 4;
                 const newPosition = {
                     x: Math.round((box.config.position.x / box.config.size) * newSize),
                     y: Math.round((box.config.position.y / box.config.size) * newSize)
                 };
 
-              
+
                 return {
                     ...box,
                     config: {
@@ -173,37 +209,17 @@ const FloorPlanEditor = () => {
         adjustBoxesForGridSize();
     }, [gridSize, boxes, gridHeight, gridWidth]);
 
-    // useEffect(() => {
-    //     const updatedBoxes = boxes.map(box => {
-    //         const newSize = gridSize - 4; // Adjust the new size of the box based on gridSize
-    //         const newPosition = { // Recalculate position to align with the new grid size
-    //             x: (box.config.position.x / box.config.size) * newSize,
-    //             y: (box.config.position.y / box.config.size) * newSize
-    //         };
-
-    //         return {
-    //             ...box,
-    //             config: {
-    //                 ...box.config,
-    //                 size: newSize,
-    //                 position: newPosition
-    //             }
-    //         };
-    //     });
-
-    //     setBoxes(updatedBoxes);
-    // }, [gridSize, setBoxes, boxes]);
-
 
     return (
         <div
-            className="relative flex justify-center items-center w-full h-full filter backdrop-blur-sm bg-gradient-to-br from-gray-950 to-black text-white"
+            className="relative flex justify-center items-center w-full h-full bg-gradient-to-br from-gray-800 to-black rounded-lg overflow-hidden shadow-xl"
             style={{ width: `${gridWidth}px`, height: `${gridHeight}px` }}
             onMouseDown={handleMouseDown}
         >
-            <div className="relative w-full h-full" ref={floorPlanRef}>
+            <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${numColumns}, ${gridSize}px)`, gridTemplateRows: `repeat(${numRows}, ${gridSize}px)` }}>
                 {generateGridLines({ numColumns, numRows, gridSize })}
-                <div className="absolute inset-0" onMouseDown={handleMouseDown}> </div>
+            </div>
+            <div className="absolute inset-0" ref={floorPlanRef} onMouseDown={handleMouseDown}>
                 {boxes.map(box => (
                     <DraggableBox
                         key={box.id}
@@ -215,6 +231,7 @@ const FloorPlanEditor = () => {
                 ))}
             </div>
         </div>
+
     );
 
 

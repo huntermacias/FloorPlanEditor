@@ -6,15 +6,20 @@
   transition: transform 0.3s ease-in-out;
 }
 
-bpdy {
+body {
   height: 100%;
   width: 100%;
 }
 
 
+
+
 @layer base {
   :root {
     --gradient: #2BC0E4;
+
+    --grid-line-color: #dcdcdc;
+    --grid-line-thickness: 1px;
 
     --background: 204 50.050000000000004% 4.24%;
     --foreground: 204 7.7% 97.65%;

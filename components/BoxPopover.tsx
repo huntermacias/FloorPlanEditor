@@ -79,7 +79,7 @@ export function BoxPopover({ boxConfig, isOpen, close, setBoxes }: BoxPopoverPro
                         <Input id="product" type="text" name="product" placeholder="Product Name" value={details.product} onChange={handleDetailsChange} className="input w-full rounded-lg bg-gray-800 border-none text-white placeholder-gray-500 shadow-sm" />
                         <Input id="department" type="text" name="department" placeholder="Department Name" value={details.department} onChange={handleDetailsChange} className="input w-full rounded-lg bg-gray-800 border-none text-white placeholder-gray-500 shadow-sm" />
                     </div>
-                    <Button className="mt-4 w-full rounded-lg shadow bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2 hover:shadow-lg transition duration-300 ease-in-out">Update</Button>
+                    <Button onClick={handleUpdate} className="mt-4 w-full rounded-lg shadow bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2 hover:shadow-lg transition duration-300 ease-in-out">Update</Button>
                 </div>
             </PopoverContent>
         </Popover>

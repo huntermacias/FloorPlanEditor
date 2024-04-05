@@ -1,5 +1,6 @@
 'use client'
 import FloorPlanEditor from "@/components/FloorplanEditor";
+import {Inventory} from "@/components/Inventory";
 import { LayoutGallery } from "@/components/LayoutGallery";
 import LeftToolbar from "@/components/LeftToolbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,12 +21,15 @@ export default function Home() {
       <div className="">
         <Tabs defaultValue="floorplan-editor">
           <div className="flex gap-4 mb-6">
+            {/* Tabs */}
             <TabsList>
               <TabsTrigger value="floorplan-editor" className="tabs-trigger">Editor</TabsTrigger>
               <TabsTrigger value="layouts" className="tabs-trigger">Layouts</TabsTrigger>
+              <TabsTrigger value="inventory" className="tabs-trigger">Inventory</TabsTrigger>
             </TabsList>
           </div>
-  
+
+          {/* Tab 1: Editor */}
           <TabsContent value="floorplan-editor">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold mb-4">Editor</h2>
@@ -34,6 +38,7 @@ export default function Home() {
             <FloorPlanEditor />
           </TabsContent>
   
+          {/* Tab 2: Layouts */}
           <TabsContent value="layouts">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold mb-4">Predefined Layouts</h2>
@@ -41,6 +46,17 @@ export default function Home() {
             </div>
             <LayoutGallery />
           </TabsContent>
+
+          {/* Tab 3: Inventory */}
+          <TabsContent value="inventory">
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold mb-4">Inventory</h2>
+              <p className="text-gray-400">Manage your inventory, sales, and routes</p>
+            </div>
+            <Inventory />
+          </TabsContent>
+
+
         </Tabs>
       </div>
     </main>
